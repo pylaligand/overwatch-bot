@@ -16,5 +16,5 @@ mvn install
 
 Run
 ```
-java -jar target/overwatch-slack-bot.jar
+java -jar target/overwatch-slack-bot-1.0-SNAPSHOT.jar
 ```

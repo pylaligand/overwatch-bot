@@ -14,4 +14,6 @@ hs_err_pid*
 ###########
 # Additions
 
+.classpath
+effective.pom
 target
