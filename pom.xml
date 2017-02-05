@@ -17,6 +17,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
       <groupId>me.ramswaroop.jbot</groupId>
       <artifactId>jbot</artifactId>
       <version>3.0.2</version>
