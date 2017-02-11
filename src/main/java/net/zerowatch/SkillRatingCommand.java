@@ -1,10 +1,11 @@
 package net.zerowatch;
 
+import me.ramswaroop.jbot.core.slack.models.RichMessage;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import me.ramswaroop.jbot.core.slack.models.RichMessage;
 
 /**
  * Handles request for SR lookups.
@@ -12,10 +13,13 @@ import me.ramswaroop.jbot.core.slack.models.RichMessage;
 @RestController
 public final class SkillRatingCommand {
 
-  @RequestMapping(value = "/test",
-      method = RequestMethod.GET)
+  @RequestMapping(value = "/skills",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public RichMessage onReceiveSlashCommand(
-      @RequestParam("something") String something) {
-    return new RichMessage("Got: " + something);
+      @RequestParam("user_name") String userName) {
+    RichMessage result = new RichMessage("Hello " + userName + "!");
+    result.setResponseType("in_channel");
+    return result.encodedMessage();
   }
 }
