@@ -1,0 +1,9 @@
+name: overwatch_slack_bot
+author: P.Y. Laligand
+version: 0.0.1
+description: A Slack bot for Overwatch communities.
+dependencies:
+  heroku_slack_bot:
+    git:
+      url: https://github.com/pylaligand/heroku-slack-bot.git
+      ref: master
