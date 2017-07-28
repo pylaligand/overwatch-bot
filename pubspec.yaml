@@ -10,4 +10,3 @@ dependencies:
       url: https://github.com/pylaligand/heroku-slack-bot.git
       ref: master
   http: ^0.11.3+3
-  logging: ^0.11.2
