@@ -9,7 +9,7 @@ class Config extends ServerConfig {
   String get name => 'OverwatchSlackBot';
 
   @override
-  Map<String, SlackCommandHandler> get commands => {
+  Map<String, SlackCommandHandler> loadCommands(Map<String, String> env) => {
         'dummy': new DummyHandler(),
       };
 
