@@ -12,6 +12,9 @@ import '../lib/configuration.dart' as config;
 
 /// Updates the Firebase database with data from Slack and other sources.
 class SyncTask extends BackgroundTask {
+  @override
+  List<String> get environmentVariables => config.ALL;
+
   /// Extracts battletags from a data string.
   List<String> _extractBattletags(String data) {
     // TODO(pylaligand): handle accentuated characters properly.
@@ -26,7 +29,7 @@ class SyncTask extends BackgroundTask {
   }
 
   Future<FirebaseClient> _initializeFirebase() async {
-    final secret = getEnv(config.FIREBASE_SECRET);
+    final secret = environment[config.FIREBASE_SECRET];
     final credentials = new ServiceAccountCredentials.fromJson(secret);
     final httpClient = await clientViaServiceAccount(credentials, [
       'https://www.googleapis.com/auth/firebase.database',
@@ -46,7 +49,7 @@ class SyncTask extends BackgroundTask {
         .toList()..sort();
     log.info('Extracted ${tags.length} tags.');
     final firebaseClient = await _initializeFirebase();
-    final database = getEnv(config.FIREBASE_DATABASE);
+    final database = environment[config.FIREBASE_DATABASE];
     final data = {
       'last_updated': new DateTime.now().toString(),
       'list': tags,
