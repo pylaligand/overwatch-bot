@@ -5,6 +5,7 @@ import 'package:heroku_slack_bot/heroku_slack_bot.dart';
 import '../lib/configuration.dart' as config;
 import '../lib/firebase_provider.dart';
 import '../lib/roster_handler.dart';
+import '../lib/stats_handler.dart';
 
 class Config extends ServerConfig {
   @override
@@ -16,6 +17,7 @@ class Config extends ServerConfig {
   @override
   Map<String, SlackCommandHandler> loadCommands(Map<String, String> env) => {
         'roster': new RosterHandler(),
+        'stats': new StatsHandler(),
       };
 
   @override
