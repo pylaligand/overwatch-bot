@@ -36,7 +36,7 @@ class SyncTask extends BackgroundTask {
     final summaries = {};
     await Future.forEach(battletags, (String tag) async {
       log.info('Fetching $tag...');
-      summaries[tag] = await client.getUserInfo(tag);
+      summaries[tag] = await client.getUserInfo(tag, log);
     });
     return summaries;
   }
@@ -53,7 +53,7 @@ class SyncTask extends BackgroundTask {
     final userList = await slackClient.listUsers();
     final users = _debug ? userList.take(5).toList() : userList;
     log.info('Found ${users.length} users.');
-    final Map<String, List<String>> tagsByUser = new Map.fromIterable(users,
+    final Map<SlackUser, List<String>> tagsByUser = new Map.fromIterable(users,
         value: (SlackUser user) => _extractBattletags(user.title));
     final tags = tagsByUser.values.expand((List<String> tags) => tags).toList()
       ..sort();
@@ -65,7 +65,7 @@ class SyncTask extends BackgroundTask {
     log.info('Fetching stats...');
     final summaries = await _fetchStats(tags, log);
     await Future.forEach(users, (SlackUser user) async {
-      final tags = tagsByUser[user];
+      final tags = tagsByUser[user] ?? const [];
       stats[user.id] = {
         'name': user.name,
         'stats': tags

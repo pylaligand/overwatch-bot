@@ -23,7 +23,7 @@ class StatsHandler extends SlackCommandHandler {
         ? statsByUser[userId]['stats'].map((Map stat) => stat['battletag'])
         : [];
     final stats = statsByUser.values
-        .expand((Map<String, dynamic> user) => user['stats'])
+        .expand((Map<String, dynamic> user) => user['stats'] ?? const [])
         .toList()..sort((Map a, Map b) => b['sr'] - a['sr']);
     final content = stats.map((Map stat) {
       final String tag = stat['battletag'];
