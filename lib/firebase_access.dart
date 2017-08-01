@@ -27,17 +27,17 @@ class FirebaseAccess {
     return _client;
   }
 
-  setBattleTags(List<String> tags) async {
-    final client = await _access;
-    final data = {
-      'last_updated': new DateTime.now().toString(),
-      'list': tags,
-    };
-    await client.put(new Uri.https(_database, 'battletags.json'), data);
-  }
+  Future<Null> setBattleTags(List<String> tags) async => await (await _access)
+      .put(new Uri.https(_database, 'battletags.json'), tags);
 
   Future<List<String>> getBattletags() async =>
-      (await _access).get(new Uri.https(_database, 'battletags/list.json'));
+      (await _access).get(new Uri.https(_database, 'battletags.json'));
+
+  Future<Null> setStatsByUser(Map stats) async => await (await _access)
+      .put(new Uri.https(_database, 'statsByUser.json'), stats);
+
+  Future<Map<String, dynamic>> getStatsByUser() async =>
+      (await _access).get(new Uri.https(_database, 'statsByUser.json'));
 }
 
 /// Transforms a [Client] into a [BaseClient].

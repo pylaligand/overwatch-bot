@@ -1,12 +1,19 @@
 // Copyright (c) 2017 P.Y. Laligand
 
+import 'dart:async';
+
 import 'package:heroku_slack_bot/heroku_slack_bot.dart';
 
 import '../lib/configuration.dart' as config;
 import '../lib/firebase_access.dart';
+import '../lib/overwatch_client.dart';
 
 /// Updates the Firebase database with data from Slack and other sources.
 class SyncTask extends BackgroundTask {
+  final bool _debug;
+
+  SyncTask(this._debug);
+
   @override
   List<String> get environmentVariables => config.ALL;
 
@@ -23,25 +30,58 @@ class SyncTask extends BackgroundTask {
         .toList();
   }
 
+  Future<Map<String, UserSummary>> _fetchStats(
+      List<String> battletags, Logger log) async {
+    final client = new OverwatchClient();
+    final summaries = {};
+    await Future.forEach(battletags, (String tag) async {
+      log.info('Fetching $tag...');
+      summaries[tag] = await client.getUserInfo(tag);
+    });
+    return summaries;
+  }
+
   @override
   execute() async {
     final log = new Logger('DataSyncer');
-    log.info('Getting users...');
-    final users = await slackClient.listUsers();
-    log.info('Found ${users.length} users.');
-    final tags = users
-        .expand((SlackUser user) => _extractBattletags(user.title))
-        .toList()..sort();
-    log.info('Extracted ${tags.length} tags.');
     final client = new FirebaseAccess(
       environment[config.FIREBASE_SECRET],
       environment[config.FIREBASE_DATABASE],
     );
+
+    log.info('Fetching users...');
+    final userList = await slackClient.listUsers();
+    final users = _debug ? userList.take(5).toList() : userList;
+    log.info('Found ${users.length} users.');
+    final Map<String, List<String>> tagsByUser = new Map.fromIterable(users,
+        value: (SlackUser user) => _extractBattletags(user.title));
+    final tags = tagsByUser.values.expand((List<String> tags) => tags).toList()
+      ..sort();
+    log.info('Extracted ${tags.length} tags.');
     await client.setBattleTags(tags);
-    log.info('Database updated!');
+    log.info('Battletags updated!');
+
+    final stats = {};
+    log.info('Fetching stats...');
+    final summaries = await _fetchStats(tags, log);
+    await Future.forEach(users, (SlackUser user) async {
+      final tags = tagsByUser[user];
+      stats[user.id] = {
+        'name': user.name,
+        'stats': tags
+            .map((String tag) => summaries[tag])
+            .map((UserSummary summary) => {
+                  'battletag': summary.battletag,
+                  'sr': summary.skillRating,
+                })
+            .toList(),
+      };
+    });
+    await client.setStatsByUser(stats);
+    log.info('Stats updated!');
   }
 }
 
 main(List<String> args) async {
-  await new SyncTask().run();
+  await new SyncTask(args.length == 1 && args[0] == "--debug").run();
 }
